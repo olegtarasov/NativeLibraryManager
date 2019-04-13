@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Cache;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -32,24 +33,43 @@ namespace NativeLibraryManager
 			_items = items;
 		}
 
-		/// <summary>
-		/// Extract and load native library based on current platform and process bitness.
-		/// </summary>
-		public void LoadNativeLibrary()
+        /// <summary>
+        /// Extract and load native library based on current platform and process bitness.
+        /// </summary>
+        public bool TryLoadNativeLibrary()
+        {
+            return LoadNativeLibrary(false);
+        }
+
+        /// <summary>
+        /// Extract and load native library based on current platform and process bitness.
+        /// Throws an exception if current platform is not supported.
+        /// </summary>
+        public void LoadNativeLibrary()
+        {
+            LoadNativeLibrary(true);
+        }
+
+        private bool LoadNativeLibrary(bool throwIfNotSupported)
 		{
 			if (_libLoaded)
 			{
-				return;
+				return true;
 			}
 
 			lock (_resourceLocker)
 			{
 				if (_libLoaded)
 				{
-					return;
+					return true;
 				}
 
-				var item = FindItem();
+                var item = FindItem(throwIfNotSupported);
+                if (item == null)
+                {
+                    return false;
+                }
+
 				string file = UnpackResources(item);
 
 				if (item.Platform == Platform.Windows)
@@ -58,8 +78,10 @@ namespace NativeLibraryManager
 				}
 
 				_libLoaded = true;
-			}
-		}
+                return true;
+            }
+        }
+
 
 		private void LoadLibrary(string path)
 		{
@@ -114,19 +136,19 @@ namespace NativeLibraryManager
 			File.WriteAllBytes(path, bytes);
 		}
 
-		private LibraryItem FindItem()
+		private LibraryItem FindItem(bool throwIfNotSupported)
 		{
 			var platform = GetPlatform();
 			var bitness = Environment.Is64BitProcess ? Bitness.x64 : Bitness.x32;
 
-			var item = _items.FirstOrDefault(x => x.Platform == platform && x.Bitness == bitness);
-			if (item == null)
-			{
-				throw new NoBinaryForPlatform($"There is no supported native library for platform '{platform}' and bitness '{bitness}'");
-			}
+            var item = _items.FirstOrDefault(x => x.Platform == platform && x.Bitness == bitness);
+            if (item == null && throwIfNotSupported)
+            {
+                throw new NoBinaryForPlatform($"There is no supported native library for platform '{platform}' and bitness '{bitness}'");
+            }
 
-			return item;
-		}
+            return item;
+        }
 
 		private Platform GetPlatform()
 		{
@@ -160,7 +182,7 @@ namespace NativeLibraryManager
 
 		}
 
-		#region LoadLibraryEx
+        #region LoadLibraryEx
 
 		[System.Flags]
 		private enum LoadLibraryFlags : uint
