@@ -1,43 +1,39 @@
-﻿namespace NativeLibraryManager
+namespace NativeLibraryManager
 {
-	/// <summary>
-	/// A class to store the information about native library for concrete platform and bitness.
-	/// </summary>
-	public class LibraryItem
-	{
-		/// <summary>
-		/// Ctor.
-		/// </summary>
-		/// <param name="fileName">Filename to use when extracting the library.</param>
-		/// <param name="resource">Library binary.</param>
-		/// <param name="platform">Platform for which this binary is used.</param>
-		/// <param name="bitness">Bitness for which this binary is used.</param>
-		public LibraryItem(string fileName, byte[] resource, Platform platform, Bitness bitness)
-		{
-			FileName = fileName;
-			Resource = resource;
-			Platform = platform;
-			Bitness = bitness;
-		}
+    /// <summary>
+    /// Library binaries for specified platform and bitness.
+    /// </summary>
+    public class LibraryItem : LibraryItemBase
+    {
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="platform">Binary platform.</param>
+        /// <param name="bitness">Binary bitness.</param>
+        /// <param name="files">A collection of files for this bitness and platform.</param>
+        public LibraryItem(Platform platform, Bitness bitness, params LibraryFile[] files) : base(platform, bitness)
+        {
+            Files = files;
+        }
 
-		/// <summary>
-		/// Filename to use when extracting the library.
-		/// </summary>
-		public string FileName { get; set; }
-
-		/// <summary>
-		/// Library binary.
-		/// </summary>
-		public byte[] Resource { get; set; }
-
-		/// <summary>
-		/// Platform for which this binary is used.
-		/// </summary>
-		public Platform Platform { get; set; }
-
-		/// <summary>
-		/// Bitness for which this binary is used.
-		/// </summary>
-		public Bitness Bitness { get; set; }
-	}
+        /// <summary>
+        /// Library files.
+        /// </summary>
+        public LibraryFile[] Files { get; set; }
+        
+        /// <summary>
+        /// Unpacks the library and directly loads it if on Windows.
+        /// </summary>
+        public virtual void LoadItem()
+        {
+            for (int i = 0; i < Files.Length; i++)
+            {
+                string file = Files[i].UnpackResources();
+                if (Platform == Platform.Windows)
+                {
+                    Files[i].LoadWindowsLibrary(file);
+                }  
+            }
+        }
+    }
 }
