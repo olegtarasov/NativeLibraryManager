@@ -3,7 +3,7 @@ namespace NativeLibraryManager
     /// <summary>
     /// Library binaries for specified platform and bitness.
     /// </summary>
-    public class LibraryItem : LibraryItemBase
+    public class LibraryItem
     {
         /// <summary>
         /// Ctor.
@@ -11,8 +11,10 @@ namespace NativeLibraryManager
         /// <param name="platform">Binary platform.</param>
         /// <param name="bitness">Binary bitness.</param>
         /// <param name="files">A collection of files for this bitness and platform.</param>
-        public LibraryItem(Platform platform, Bitness bitness, params LibraryFile[] files) : base(platform, bitness)
+        public LibraryItem(Platform platform, Bitness bitness, params LibraryFile[] files)
         {
+            Platform = platform;
+            Bitness = bitness;
             Files = files;
         }
 
@@ -20,6 +22,16 @@ namespace NativeLibraryManager
         /// Library files.
         /// </summary>
         public LibraryFile[] Files { get; set; }
+
+        /// <summary>
+        /// Platform for which this binary is used.
+        /// </summary>
+        public Platform Platform { get; set; }
+
+        /// <summary>
+        /// Bitness for which this binary is used.
+        /// </summary>
+        public Bitness Bitness { get; set; }
 
         /// <summary>
         /// Unpacks the library and directly loads it if on Windows.

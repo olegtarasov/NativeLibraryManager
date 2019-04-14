@@ -12,6 +12,10 @@
     <RepositoryUrl>https://github.com/olegtarasov/NativeLibraryManager</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\NativeLibraryManager.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="LibLog" Version="5.0.6">
       <PrivateAssets>all</PrivateAssets>
