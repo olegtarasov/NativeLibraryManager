@@ -35,10 +35,10 @@ namespace NativeLibraryManager
 		/// </summary>
 		public byte[] Resource { get; set; }
 
-		internal string UnpackResources()
+		internal string UnpackResources(Assembly targetAssembly)
 		{
 			string curDir;
-			var ass = Assembly.GetExecutingAssembly().Location;
+			var ass = targetAssembly.Location;
 			if (string.IsNullOrEmpty(ass))
 			{
 				curDir = Environment.CurrentDirectory;

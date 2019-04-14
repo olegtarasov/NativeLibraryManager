@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using NativeLibraryManager;
 using Shouldly;
@@ -15,7 +16,7 @@ namespace UnitTests
         {
             var file = new LibraryFile("TestFile.txt", SampleData.SampleFile);
 
-            string unpackedFile = file.UnpackResources();
+            string unpackedFile = file.UnpackResources(Assembly.GetExecutingAssembly());
             
             unpackedFile.ShouldNotBeNullOrEmpty();
             File.Exists(unpackedFile).ShouldBeTrue();

@@ -18,15 +18,18 @@ namespace NativeLibraryManager
 
 		private readonly object _resourceLocker = new object();
 		private readonly LibraryItem[] _items;
+		private readonly Assembly _targetAssembly;
 
 		private bool _libLoaded = false;
 
 		/// <summary>
 		/// Ctor.
 		/// </summary>
+		/// <param name="targetAssembly">Calling assembly.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(params LibraryItem[] items)
+		public LibraryManager(Assembly targetAssembly, params LibraryItem[] items)
 		{
+			_targetAssembly = targetAssembly;
 			_items = items;
 		}
 
@@ -52,7 +55,7 @@ namespace NativeLibraryManager
 				}
 
                 var item = FindItem();
-                item.LoadItem(loadLibrary);
+                item.LoadItem(_targetAssembly, loadLibrary);
 
 				_libLoaded = true;
             }

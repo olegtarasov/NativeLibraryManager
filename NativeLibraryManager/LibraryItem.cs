@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace NativeLibraryManager
 {
     /// <summary>
@@ -36,14 +38,15 @@ namespace NativeLibraryManager
         /// <summary>
         /// Unpacks the library and directly loads it if on Windows.
         /// </summary>
+        /// <param name="targetAssembly">Target assembly.</param>
         /// <param name="loadLibrary">
         /// Use LoadLibrary API call on Windows to explicitly load library into the process.
         /// </param>
-        public virtual void LoadItem(bool loadLibrary = true)
+        public virtual void LoadItem(Assembly targetAssembly, bool loadLibrary = true)
         {
             for (int i = 0; i < Files.Length; i++)
             {
-                string file = Files[i].UnpackResources();
+                string file = Files[i].UnpackResources(targetAssembly);
                 if (Platform == Platform.Windows && loadLibrary)
                 {
                     Files[i].LoadWindowsLibrary(file);
