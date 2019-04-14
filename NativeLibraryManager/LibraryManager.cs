@@ -30,11 +30,14 @@ namespace NativeLibraryManager
 			_items = items;
 		}
 
-        /// <summary>
-        /// Extract and load native library based on current platform and process bitness.
-        /// Throws an exception if current platform is not supported.
-        /// </summary>
-        public void LoadNativeLibrary()
+		/// <summary>
+		/// Extract and load native library based on current platform and process bitness.
+		/// Throws an exception if current platform is not supported.
+		/// </summary>
+		/// <param name="loadLibrary">
+		/// Use LoadLibrary API call on Windows to explicitly load library into the process.
+		/// </param>
+		public void LoadNativeLibrary(bool loadLibrary = true)
 		{
 			if (_libLoaded)
 			{
@@ -49,7 +52,7 @@ namespace NativeLibraryManager
 				}
 
                 var item = FindItem();
-                item.LoadItem();
+                item.LoadItem(loadLibrary);
 
 				_libLoaded = true;
             }

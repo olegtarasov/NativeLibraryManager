@@ -20,16 +20,19 @@ namespace NativeLibraryManager
         /// Library files.
         /// </summary>
         public LibraryFile[] Files { get; set; }
-        
+
         /// <summary>
         /// Unpacks the library and directly loads it if on Windows.
         /// </summary>
-        public virtual void LoadItem()
+        /// <param name="loadLibrary">
+        /// Use LoadLibrary API call on Windows to explicitly load library into the process.
+        /// </param>
+        public virtual void LoadItem(bool loadLibrary = true)
         {
             for (int i = 0; i < Files.Length; i++)
             {
                 string file = Files[i].UnpackResources();
-                if (Platform == Platform.Windows)
+                if (Platform == Platform.Windows && loadLibrary)
                 {
                     Files[i].LoadWindowsLibrary(file);
                 }  

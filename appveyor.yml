@@ -23,7 +23,12 @@ notifications:
 - provider: Webhook
   url: https://maker.ifttt.com/trigger/build_complete/with/key/dJWxoECfpFFVzQ9UCWxVIITWZFJZ3uN2i-KwHQI3vU3
   method: POST
-  body: "{'value1': '{{projectName}} {{buildVersion}}', 'value2': '{{status}}', 'value3': '{{buildUrl}}'}"
+  body: >-
+    {
+      'value1': '{{projectName}} {{buildVersion}}', 
+      'value2': '{{status}}', 
+      'value3': '{{buildUrl}}'
+    }
   on_build_success: true
   on_build_failure: true
   on_build_status_changed: false
