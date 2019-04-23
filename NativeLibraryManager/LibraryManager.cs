@@ -61,7 +61,12 @@ namespace NativeLibraryManager
             }
         }
 
-		private LibraryItem FindItem()
+		/// <summary>
+		/// Finds a library item based on current platform and bitness.
+		/// </summary>
+		/// <returns>Library item based on platform and bitness.</returns>
+		/// <exception cref="NoBinaryForPlatformException"></exception>
+		public LibraryItem FindItem()
 		{
 			var platform = GetPlatform();
 			var bitness = Environment.Is64BitProcess ? Bitness.x64 : Bitness.x32;

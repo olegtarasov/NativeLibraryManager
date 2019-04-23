@@ -35,22 +35,20 @@ namespace NativeLibraryManager
 		/// </summary>
 		public byte[] Resource { get; set; }
 
+		/// <summary>
+		/// Gets the path to which current file will be unpacked.
+		/// </summary>
+		/// <param name="targetAssembly">Target assembly for which to compute the path.</param>
+		public string GetUnpackPath(Assembly targetAssembly)
+		{
+			return targetAssembly.CombineWithCurrentDirectory(FileName);
+		}
+
 		internal string UnpackResources(Assembly targetAssembly)
 		{
-			string curDir;
-			var ass = targetAssembly.Location;
-			if (string.IsNullOrEmpty(ass))
-			{
-				curDir = Environment.CurrentDirectory;
-			}
-			else
-			{
-				curDir = Path.GetDirectoryName(ass);
-			}
-
-			_log.Info($"Unpacking native library {FileName} to {curDir}");
-
-			string path = !string.IsNullOrEmpty(curDir) ? Path.Combine(curDir, FileName) : FileName;
+			string path = GetUnpackPath(targetAssembly);
+			
+			_log.Info($"Unpacking native library {FileName} to {path}");
 
 			UnpackFile(path, Resource);
 
