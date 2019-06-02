@@ -12,7 +12,7 @@ namespace NativeLibraryManager
 	/// </summary>
 	public class LibraryFile
 	{
-		private static readonly ILog _log = LogProvider.For<LibraryFile>();
+		private static readonly ILog Log = LogProvider.For<LibraryFile>();
 
 		/// <summary>
 		/// Ctor.
@@ -48,7 +48,7 @@ namespace NativeLibraryManager
 		{
 			string path = GetUnpackPath(targetAssembly);
 			
-			_log.Info($"Unpacking native library {FileName} to {path}");
+			Log.Info($"Unpacking native library {FileName} to {path}");
 
 			UnpackFile(path, Resource);
 
@@ -59,7 +59,7 @@ namespace NativeLibraryManager
 		{
 			if (File.Exists(path))
 			{
-				_log.Info($"File {path} already exists, computing hashes.");
+				Log.Info($"File {path} already exists, computing hashes.");
 				using (var md5 = MD5.Create())
 				{
 					using (var stream = File.OpenRead(path))
@@ -69,7 +69,7 @@ namespace NativeLibraryManager
 
 						if (string.Equals(fileHash, curHash))
 						{
-							_log.Info($"Hashes are equal, no need to unpack.");
+							Log.Info($"Hashes are equal, no need to unpack.");
 							return;
 						}
 					}
@@ -81,9 +81,9 @@ namespace NativeLibraryManager
 
 		internal void LoadWindowsLibrary(string path)
 		{
-			_log.Info($"Directly loading {path}...");
+			Log.Info($"Directly loading {path}...");
 			var result = LoadLibraryEx(path, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_SYSTEM32 | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_USER_DIRS);
-			_log.Info(result == IntPtr.Zero ? "FAILED!" : "Success");
+			Log.Info(result == IntPtr.Zero ? "FAILED!" : "Success");
 		}
 		
 		#region LoadLibraryEx

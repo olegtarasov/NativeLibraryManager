@@ -14,7 +14,7 @@ namespace NativeLibraryManager
 	/// </summary>
 	public class LibraryManager
 	{
-		private static readonly ILog _log = LogProvider.For<LibraryManager>();
+		private static readonly ILog Log = LogProvider.For<LibraryManager>();
 
 		private readonly object _resourceLocker = new object();
 		private readonly LibraryItem[] _items;
