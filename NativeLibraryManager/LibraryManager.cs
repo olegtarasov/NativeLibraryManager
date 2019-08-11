@@ -80,7 +80,11 @@ namespace NativeLibraryManager
             return item;
         }
 
-		private Platform GetPlatform()
+		/// <summary>
+		/// Gets the platform type.
+		/// </summary>
+		/// <exception cref="UnsupportedPlatformException">Thrown when platform is not supported.</exception>
+		public static Platform GetPlatform()
 		{
 			string windir = Environment.GetEnvironmentVariable("windir");
 			if (!string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir))
@@ -109,7 +113,6 @@ namespace NativeLibraryManager
 			{
 				throw new UnsupportedPlatformException("Unsupported OS!");
 			}
-
 		}
 	}
 }
