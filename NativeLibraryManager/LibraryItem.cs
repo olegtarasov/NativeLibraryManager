@@ -50,7 +50,12 @@ namespace NativeLibraryManager
                 if (Platform == Platform.Windows && loadLibrary)
                 {
                     Files[i].LoadWindowsLibrary(file);
-                }  
+                }
+
+                if (Platform == Platform.Linux && loadLibrary)
+                {
+                    Files[i].LoadLinuxLibrary(file);
+                }
             }
         }
     }
