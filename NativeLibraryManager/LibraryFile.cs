@@ -79,11 +79,6 @@ namespace NativeLibraryManager
 			File.WriteAllBytes(path, bytes);
 		}
 
-		private const int RTLD_LAZY = 0x00001; //Only resolve symbols as needed
-		private const int RTLD_GLOBAL = 0x00100; //Make symbols available to libraries loaded later
-		[DllImport("dl")]
-		private static extern IntPtr dlopen (string file, int mode);
-		
 		internal void LoadLinuxLibrary(string path)
 		{
 			Log.Info($"Linux dlopen of {path}");
@@ -94,13 +89,21 @@ namespace NativeLibraryManager
 			}
 		}
 
-
 		internal void LoadWindowsLibrary(string path)
 		{
 			Log.Info($"Directly loading {path}...");
 			var result = LoadLibraryEx(path, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_SYSTEM32 | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_USER_DIRS);
 			Log.Info(result == IntPtr.Zero ? "FAILED!" : "Success");
 		}
+
+		#region dlopen
+
+		private const int RTLD_LAZY = 0x00001; //Only resolve symbols as needed
+		private const int RTLD_GLOBAL = 0x00100; //Make symbols available to libraries loaded later
+		[DllImport("dl")]
+		private static extern IntPtr dlopen (string file, int mode);
+
+		#endregion
 		
 		#region LoadLibraryEx
 
