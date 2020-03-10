@@ -3,7 +3,7 @@
 This library helps you manage dependencies that you want to bundle with your .NET standard assembly. Originally it was developed
 to be used with native shared libraries, but you can bundle any file you want.
 
-The main feature of this library is cross-platform support. You tell it which dependencies are for which platform, and `LibraryManager`
+The main feature of this library is cross-platform support. You tell it which dependencies are for which platform, and `NativeLibraryManager`
 will extract and load relevent files under each patform.
 
 # How to use the library
@@ -30,7 +30,7 @@ for Windows, `libTestLib.so` for Linux and `libTestLib.dylib` for macOs. Add the
 
 Now your dependencies will be compiled into your assembly as resources.
 
-## Use `LibraryManager` to specify and extract dependencies
+## Use `NativeLibraryManager` to specify and extract dependencies
 
 ```csharp
 private static void Main(string[] args)
