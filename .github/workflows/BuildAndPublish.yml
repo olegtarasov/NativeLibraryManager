@@ -1,0 +1,26 @@
+name: Build and publish Nuget
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: olegtarasov/get-tag@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.202
+
+      - name: Create the package
+        run: dotnet pack NativeLibraryManager --configuration Release -p:PackageVersion=$GIT_TAG_NAME -o .
+
+      - name: Push the package
+        env:
+          APIKEY: ${{ secrets.NugetKey }}
+        run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k $APIKEY
