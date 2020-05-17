@@ -79,7 +79,7 @@ namespace NativeLibraryManager
 			File.WriteAllBytes(path, bytes);
 		}
 
-		internal void LoadLinuxLibrary(string path)
+		internal static void LoadLinuxLibrary(string path)
 		{
 			Log.Info($"Linux dlopen of {path}");
 			var result = dlopen(path, RTLD_LAZY | RTLD_GLOBAL);
@@ -89,7 +89,7 @@ namespace NativeLibraryManager
 			}
 		}
 
-		internal void LoadWindowsLibrary(string path)
+		internal static void LoadWindowsLibrary(string path)
 		{
 			Log.Info($"Directly loading {path}...");
 			var result = LoadLibraryEx(path, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_SYSTEM32 | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_USER_DIRS);

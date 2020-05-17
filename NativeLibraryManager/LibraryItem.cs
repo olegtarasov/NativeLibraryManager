@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace NativeLibraryManager
@@ -44,17 +47,37 @@ namespace NativeLibraryManager
         /// </param>
         public virtual void LoadItem(Assembly targetAssembly, bool loadLibrary = true)
         {
+            var directories = new HashSet<string>();
+            var files = new string[Files.Length];
             for (int i = 0; i < Files.Length; i++)
             {
                 string file = Files[i].UnpackResources(targetAssembly);
-                if (Platform == Platform.Windows && loadLibrary)
+                files[i] = file;
+                
+                string dir = Path.GetDirectoryName(file);
+                if (!string.IsNullOrEmpty(dir) && Path.IsPathRooted(dir))
                 {
-                    Files[i].LoadWindowsLibrary(file);
+                    directories.Add(dir);
+                }
+            }
+
+            EnvironmentManager.AddDirectoriesToSearchPath(Platform, directories.ToArray());
+            
+            if (!loadLibrary || Platform == Platform.MacOs)
+            {
+                return;
+            }
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (Platform == Platform.Windows)
+                {
+                    LibraryFile.LoadWindowsLibrary(files[i]);
                 }
 
-                if (Platform == Platform.Linux && loadLibrary)
+                if (Platform == Platform.Linux)
                 {
-                    Files[i].LoadLinuxLibrary(file);
+                    LibraryFile.LoadLinuxLibrary(files[i]);
                 }
             }
         }
