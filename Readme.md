@@ -61,6 +61,10 @@ We should note that resource name you pass to ResourceAccessor is just a path to
 accessor.Binary("Foo.Bar.lib.dll")
 ```
 
+## Logging with `Microsoft.Extensions.Logging`
+
+`LibraryManager` writes a certain amount of logs in case you would like to debug something. This library uses .NET Core `Microsoft.Extensions.Logging` abstraction, so in order to enable logging, just obtain an instance of `Microsoft.Extensions.Logging.ILoggerFactory` and pass it as a parameter to `LibraryManager` constructor.
+
 ## Explicitly loading libraries under Windows and Linux
 
 When called under Windows and Linux, `LoadNativeLibrary()` explicitly loads all dependencies into process memory. It uses `LoadLibraryEx` under

@@ -5,7 +5,7 @@ using System.Net.Cache;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using NativeLibraryManager.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace NativeLibraryManager
 {
@@ -14,12 +14,9 @@ namespace NativeLibraryManager
 	/// </summary>
 	public class LibraryManager
 	{
-		private static readonly ILog Log = LogProvider.For<LibraryManager>();
-
 		private readonly object _resourceLocker = new object();
-		private readonly LibraryItem[] _items;
-		private readonly Assembly _targetAssembly;
-
+		private readonly LibraryItemInternal[] _items;
+		
 		private bool _libLoaded = false;
 
 		/// <summary>
@@ -27,10 +24,22 @@ namespace NativeLibraryManager
 		/// </summary>
 		/// <param name="targetAssembly">Calling assembly.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(Assembly targetAssembly, params LibraryItem[] items)
+		public LibraryManager(Assembly targetAssembly, params LibraryItem[] items) : this(targetAssembly, null, items)
 		{
-			_targetAssembly = targetAssembly;
-			_items = items;
+		}
+
+		/// <summary>
+		/// Ctor.
+		/// </summary>
+		/// <param name="targetAssembly">Calling assembly.</param>
+		/// <param name="loggerFactory">Logger factory.</param>
+		/// <param name="items">Library binaries for different platforms.</param>
+		public LibraryManager(Assembly targetAssembly, ILoggerFactory loggerFactory, params LibraryItem[] items)
+		{
+			string targetDirectory = targetAssembly.GetCurrentDirectory();
+			var itemLogger = loggerFactory?.CreateLogger<LibraryItem>();
+
+			_items = items.Select(x => new LibraryItemInternal(x, targetDirectory, itemLogger)).ToArray();
 		}
 
 		/// <summary>
@@ -55,7 +64,7 @@ namespace NativeLibraryManager
 				}
 
                 var item = FindItem();
-                item.LoadItem(_targetAssembly, loadLibrary);
+                item.LoadItem(loadLibrary);
 
 				_libLoaded = true;
             }

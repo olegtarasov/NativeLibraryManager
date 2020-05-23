@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 
 namespace NativeLibraryManager
 {
@@ -37,49 +41,21 @@ namespace NativeLibraryManager
         /// Bitness for which this binary is used.
         /// </summary>
         public Bitness Bitness { get; set; }
+        
+        [Obsolete("targetAssembly is no longer required. Use the other overload.")]
+        public void LoadItem(Assembly targetAssembly, bool loadLibrary = true)
+        {
+        }
 
         /// <summary>
         /// Unpacks the library and directly loads it if on Windows.
         /// </summary>
-        /// <param name="targetAssembly">Target assembly.</param>
         /// <param name="loadLibrary">
         /// Use LoadLibrary API call on Windows to explicitly load library into the process.
         /// </param>
-        public virtual void LoadItem(Assembly targetAssembly, bool loadLibrary = true)
+        public virtual void LoadItem(bool loadLibrary = true)
         {
-            var directories = new HashSet<string>();
-            var files = new string[Files.Length];
-            for (int i = 0; i < Files.Length; i++)
-            {
-                string file = Files[i].UnpackResources(targetAssembly);
-                files[i] = file;
-                
-                string dir = Path.GetDirectoryName(file);
-                if (!string.IsNullOrEmpty(dir) && Path.IsPathRooted(dir))
-                {
-                    directories.Add(dir);
-                }
-            }
-
-            EnvironmentManager.AddDirectoriesToSearchPath(Platform, directories.ToArray());
-            
-            if (!loadLibrary || Platform == Platform.MacOs)
-            {
-                return;
-            }
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                if (Platform == Platform.Windows)
-                {
-                    LibraryFile.LoadWindowsLibrary(files[i]);
-                }
-
-                if (Platform == Platform.Linux)
-                {
-                    LibraryFile.LoadLinuxLibrary(files[i]);
-                }
-            }
+            throw new InvalidOperationException("This item was never added to the LibraryManager. Create a LibraryManager, add this item and then call LibraryManager.LoadNativeLibrary().");
         }
     }
 }
