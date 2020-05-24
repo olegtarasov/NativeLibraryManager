@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -11,74 +12,59 @@ using Xunit.Abstractions;
 
 namespace UnitTests
 {
+    /// <summary>
+    /// We need to use a separate process per test so that we get a clear picture (libraries must be unloaded before the next test).
+    /// </summary>
     public class LibraryManagerTests
     {
         [DllImport("TestLib")]
         private static extern int hello();
-        
+
+        private readonly ITestOutputHelper _outputHelper;
+
         public LibraryManagerTests(ITestOutputHelper outputHelper)
         {
-            LoggerFactory = new LoggerFactory(new[] {new XUnitLoggerProvider(outputHelper, new XUnitLoggerOptions())});
+            _outputHelper = outputHelper;
         }
-
-        private LoggerFactory LoggerFactory { get; }
-
         
         [Fact]
-        public void CanLoadLibraryFromAssemblyDirAndCallFunction()
+        public void CanLoadLibraryFromCurrentDirAndCallFunction()
         {
-            File.Delete("libTestLib.dylib");
-            File.Delete("libTestLib.so");
-            File.Delete("TestLib.dll");
-            
-            var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
-            var libManager = new LibraryManager(
-                Assembly.GetExecutingAssembly(),
-                LoggerFactory,
-                new LibraryItem(Platform.MacOs, Bitness.x64,
-                    new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
-                new LibraryItem(Platform.Windows, Bitness.x64, 
-                    new LibraryFile("TestLib.dll", accessor.Binary("TestLib.dll"))),
-                new LibraryItem(Platform.Linux, Bitness.x64,
-                    new LibraryFile("libTestLib.so", accessor.Binary("libTestLib.so"))));
-    
-            libManager.LoadNativeLibrary();
-
-            int result = hello();
-            result.ShouldBe(42);
+            RunTest(nameof(CanLoadLibraryFromCurrentDirAndCallFunction)).ShouldBe(0);
         }
         
         [Fact]
         public void CanLoadLibraryFromTempDirAndCallFunction()
         {
-            File.Delete("libTestLib.dylib");
-            File.Delete("libTestLib.so");
-            File.Delete("TestLib.dll");
-            
-            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(tempDir);
+            RunTest(nameof(CanLoadLibraryFromTempDirAndCallFunction)).ShouldBe(0);
+        }
 
-            try
+        private int RunTest(string name)
+        {
+            var process = Process.Start(new ProcessStartInfo("dotnet", $"TestProcess.dll {name}")
             {
-                var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
-                var libManager = new LibraryManager(
-                    tempDir,
-                    LoggerFactory,
-                    new LibraryItem(Platform.MacOs, Bitness.x64,
-                        new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
-                    new LibraryItem(Platform.Windows, Bitness.x64, 
-                        new LibraryFile("TestLib.dll", accessor.Binary("TestLib.dll"))),
-                    new LibraryItem(Platform.Linux, Bitness.x64,
-                        new LibraryFile("libTestLib.so", accessor.Binary("libTestLib.so"))));
-    
-                libManager.LoadNativeLibrary();
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            });
 
-                int result = hello();
-                result.ShouldBe(42);
-            }
-            finally
+            process.OutputDataReceived += ProcessOnOutputDataReceived;
+            process.ErrorDataReceived += ProcessOnOutputDataReceived;
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            process.WaitForExit();
+            process.CancelOutputRead();
+            process.CancelErrorRead();
+
+            return process.ExitCode;
+        }
+
+        private void ProcessOnOutputDataReceived (object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e?.Data))
             {
-                Directory.Delete(tempDir, true);
+                _outputHelper.WriteLine(e.Data);
             }
         }
     }

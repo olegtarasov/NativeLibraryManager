@@ -16,66 +16,80 @@ namespace NativeLibraryManager
 	{
 		private readonly object _resourceLocker = new object();
 		private readonly LibraryItemInternal[] _items;
-		
+		private readonly ILogger<LibraryManager> _logger;
+
 		private bool _libLoaded = false;
 
 		/// <summary>
-		/// Ctor.
+		/// Creates a new library manager which extracts to environment current directory by default.
 		/// </summary>
 		/// <param name="targetAssembly">Calling assembly.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(Assembly targetAssembly, params LibraryItem[] items) : this(targetAssembly, null, items)
+		[Obsolete("Specifying target assembly is no longer required since default target directory is environment current directory.")]
+		public LibraryManager(Assembly targetAssembly, params LibraryItem[] items) 
+			: this(Environment.CurrentDirectory, false, null, items)
 		{
 		}
 
 		/// <summary>
-		/// Ctor.
+		/// Creates a new library manager which extracts to environment current directory by default.
 		/// </summary>
-		/// <param name="targetAssembly">
-		/// Calling assembly. Native libraries will be extracted to the same directory <see cref="targetAssembly"/>
-		/// resides at, or to current directory if you assembly is weird and doesn't have a location.
-		/// </param>
+		/// <param name="items">Library binaries for different platforms.</param>
+		public LibraryManager(params LibraryItem[] items)
+			: this(Environment.CurrentDirectory, false, null, items)
+		{
+		}
+		
+		/// <summary>
+		/// Creates a new library manager which extracts to environment current directory by default.
+		/// </summary>
 		/// <param name="loggerFactory">Logger factory.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(Assembly targetAssembly, ILoggerFactory loggerFactory, params LibraryItem[] items)
-			: this(targetAssembly.GetCurrentDirectory(), loggerFactory, items)
+		public LibraryManager(ILoggerFactory loggerFactory, params LibraryItem[] items)
+			: this(Environment.CurrentDirectory, false, loggerFactory, items)
 		{
 		}
 
 		/// <summary>
-		/// Ctor.
+		/// Creates a new library manager which extracts to a custom directory.
+		///
+		/// IMPORTANT! Be sure this directory is discoverable by system library loader. Otherwise, your library won't be loaded.
 		/// </summary>
 		/// <param name="targetDirectory">Target directory to extract the libraries.</param>
 		/// <param name="loggerFactory">Logger factory.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
 		public LibraryManager(string targetDirectory, ILoggerFactory loggerFactory, params LibraryItem[] items)
+			: this(targetDirectory, true, loggerFactory, items)
+		{
+		}
+		
+		private LibraryManager(string targetDirectory, bool customDirectory, ILoggerFactory loggerFactory, params LibraryItem[] items)
 		{
 			TargetDirectory = targetDirectory;
 			var itemLogger = loggerFactory?.CreateLogger<LibraryItem>();
 
+			_logger = loggerFactory.CreateLogger<LibraryManager>();
 			_items = items.Select(x => new LibraryItemInternal(x, itemLogger)).ToArray();
+
+			if (customDirectory)
+			{
+				_logger.LogWarning("Custom directory for native libraries is specified. Be sure it is discoverable by system library loader.");
+			}
 		}
 
 		/// <summary>
 		/// Target directory to which native libraries will be extracted. Defaults to directory
 		/// in which targetAssembly, passed to <see cref="LibraryManager"/> constructor, resides.
 		/// </summary>
-		public string TargetDirectory { get; set; }
-
-		/// <summary>
-		/// Defines whether <see cref="LibraryManager"/> should add <see cref="TargetDirectory"/>
-		/// to current process' library search path.
-		///
-		/// Default is <code>True</code>.
-		/// </summary>
-		public bool ModifyLibrarySearchPath { get; set; } = true;
-
+		public string TargetDirectory { get; }
+		
 		/// <summary>
 		/// Defines whether shared libraries will be loaded explicitly. <code>LoadLibraryEx</code> is
 		/// used on Windows and <code>dlopen</code> is used on Linux and MacOs to load libraries
 		/// explicitly.
 		///
-		/// Default is <code>False</code>, since <see cref="ModifyLibrarySearchPath"/> is preferable.
+		/// WARNING! Explicit library loading on MacOs IS USELESS, and your P/Invoke call will fail unless
+		/// library path is discoverable by system library loader.
 		/// </summary>
 		public bool LoadLibraryExplicit { get; set; } = false;
 
@@ -86,7 +100,7 @@ namespace NativeLibraryManager
 		/// <param name="loadLibrary">
 		/// Use LoadLibrary API call on Windows to explicitly load library into the process.
 		/// </param>
-		[Obsolete("This method is obsolete. Direct library loading is deprecated in favor of adding target path to environment library search path.")]
+		[Obsolete("This method is obsolete. Use LoadLibraryExplicit property.")]
 		public void LoadNativeLibrary(bool loadLibrary)
 		{
 			LoadNativeLibrary();
@@ -112,9 +126,9 @@ namespace NativeLibraryManager
 
 				var item = FindItem();
 
-				if (ModifyLibrarySearchPath)
+				if (item.Platform == Platform.MacOs && LoadLibraryExplicit)
 				{
-					EnvironmentManager.AddDirectoriesToSearchPath(item.Platform, TargetDirectory);
+					_logger?.LogWarning("Current platform is MacOs and LoadLibraryExplicit is specified. Explicit library loading on MacOs IS USELESS, and your P/Invoke call will fail unless library path is discoverable by system library loader.");
 				}
 				
 				item.LoadItem(TargetDirectory, LoadLibraryExplicit);

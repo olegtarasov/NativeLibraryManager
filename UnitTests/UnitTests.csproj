@@ -14,12 +14,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="libTestLib.dylib" />
-        <EmbeddedResource Include="libTestLib.so" />
-        <EmbeddedResource Include="TestLib.dll" />
+      <ProjectReference Include="..\NativeLibraryManager\NativeLibraryManager.csproj" />
+      <ProjectReference Include="..\TestProcess\TestProcess.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NativeLibraryManager\NativeLibraryManager.csproj" />
+      <None Update="TestProcess.runtimeconfig.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

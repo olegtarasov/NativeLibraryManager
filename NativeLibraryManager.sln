@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NativeLibraryManager", "Nat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{19BCA17B-731C-4DB4-AD59-14C315481FCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProcess", "TestProcess\TestProcess.csproj", "{4D30A6BF-E6E2-4052-9FEA-F8E174E48480}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{19BCA17B-731C-4DB4-AD59-14C315481FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19BCA17B-731C-4DB4-AD59-14C315481FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19BCA17B-731C-4DB4-AD59-14C315481FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D30A6BF-E6E2-4052-9FEA-F8E174E48480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D30A6BF-E6E2-4052-9FEA-F8E174E48480}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D30A6BF-E6E2-4052-9FEA-F8E174E48480}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D30A6BF-E6E2-4052-9FEA-F8E174E48480}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

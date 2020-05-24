@@ -39,7 +39,6 @@ private static void Main(string[] args)
 {
     var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
     var libManager = new LibraryManager(
-        Assembly.GetExecutingAssembly(),
         new LibraryItem(Platform.MacOs, Bitness.x64,
             new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
         new LibraryItem(Platform.Windows, Bitness.x64, 
@@ -66,27 +65,16 @@ accessor.Binary("Foo.Bar.lib.dll")
 
 ## Target dependency directory
 
-When you pass an assembly to `LibraryManager` constructor, it determines that assembly's location and extracts dependencies to that
-directory. If the specified assembly doesn't have a location, current directory is used.
+`LibraryManager` extracts your dependencies to current process' current directory. **This is the only reliable way to use `[DllImport]` on all
+three platforms.**
 
-Alternatively, you can use another constructor overload, where you specify the target directory itself. This may be useful when you
-are not sure whether your app directory is writable.
-
-Anyway, you can change `LibraryManager.TargetDirectory` property to change target directory any time before calling 
-`LibraryManager.LoadNativeLibrary()`.
-
-## Library search path modification
-
-By default `LibraryManager` adds `LibraryManager.TargetDirectory` to current process library search path environment variable.
-It's `LD_LIBRARY_PATH` for Linux; `DYLD_LIBRARY_PATH` for MacOs; and plain ol' `PATH` for Windows.
-
-You may not want to modify these variables in some circumstances, so you can disable this behavior by setting
-`LibraryManager.ModifyLibrarySearchPath` to `false` before calling `LibraryManager.LoadNativeLibrary()`.
+If your current directory isn't writable, you are generally out of luck. You can still use explicit library loading on Windows and Linux, but on
+MacOs you are screwed. This problem can be mitigated by manually resolving function pointers, but this approach is not yet implemented in this library.
 
 ## Explicit library loading
 
-**Warning! I strongly suggest that you use library search path modification (on by default) instead of loading libraries explicitly.
-Tests show that explicit library loading doesn't work in many cases and is generally useless, at least on MacOs.**
+**Warning! Explicit library loading on MacOs IS USELESS, and your P/Invoke call will fail unless library path is discoverable by system library 
+loader (by setting `LD_LIBRARY_PATH` before running your app, for example).**
 
 In previous versions of `NativeLibraryManager` the default behavior was to explicitly load every file using `LoadLibraryEx` on Windows
 and `dlopen` on Linux (explit loading wasn't implemented for MacOs). This approach was quite rigid and caused at least two problems:
@@ -94,7 +82,7 @@ and `dlopen` on Linux (explit loading wasn't implemented for MacOs). This approa
 1. There might have been some supporting files which didn't require explicit loading. You couldn't load some files and not load the others.
 2. You should have observed a specific order in which you defined `LibraryFile`s if some of them were dependent on others.
 
-Starting from v. `1.0.21` explicit loading is disabled by default in favor of `LibraryManager.ModifyLibrarySearchPath`. 
+Starting from v. `1.0.21` explicit loading is disabled by default in favor of extracting all dependencies into process' current directory. 
 I recommend this approach as more flexible and error-proof.
 
 Nevertheless, sometimes you might want to load libraries explicitly. To do so, set `LibraryManager.LoadLibraryExplicit` to `True` before
@@ -103,7 +91,7 @@ calling `LibraryManager.LoadNativeLibrary()`.
 You can also set `LibraryFile.CanLoadExplicitly` to `False` for supporting files, which you want to exclude from explicit loading.
 
 When `LibraryManager.LoadLibraryExplicit` is `True`, `LoadLibraryEx` will be called to explicitly load libraries on Windows, and
-`dlopen` will be called on Linux **and MacOs**.
+`dlopen` will be called on Linux and MacOs.
 
 ### Dependency load order with explicit loading
 
