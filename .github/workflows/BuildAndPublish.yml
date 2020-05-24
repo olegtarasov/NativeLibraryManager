@@ -25,7 +25,7 @@ jobs:
         run: dotnet test
   build:
     needs: test
-    if: env.GIT_TAG_NAME != null
+    if: ${{ env.GIT_TAG_NAME == 'foo' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
