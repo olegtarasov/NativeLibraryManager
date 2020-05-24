@@ -68,12 +68,12 @@ namespace NativeLibraryManager
 			TargetDirectory = targetDirectory;
 			var itemLogger = loggerFactory?.CreateLogger<LibraryItem>();
 
-			_logger = loggerFactory.CreateLogger<LibraryManager>();
+			_logger = loggerFactory?.CreateLogger<LibraryManager>();
 			_items = items.Select(x => new LibraryItemInternal(x, itemLogger)).ToArray();
 
 			if (customDirectory)
 			{
-				_logger.LogWarning("Custom directory for native libraries is specified. Be sure it is discoverable by system library loader.");
+				_logger?.LogWarning("Custom directory for native libraries is specified. Be sure it is discoverable by system library loader.");
 			}
 		}
 

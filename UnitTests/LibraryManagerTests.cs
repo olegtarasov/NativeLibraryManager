@@ -17,9 +17,6 @@ namespace UnitTests
     /// </summary>
     public class LibraryManagerTests
     {
-        [DllImport("TestLib")]
-        private static extern int hello();
-
         private readonly ITestOutputHelper _outputHelper;
 
         public LibraryManagerTests(ITestOutputHelper outputHelper)
@@ -37,6 +34,12 @@ namespace UnitTests
         public void CanLoadLibraryFromTempDirAndCallFunction()
         {
             RunTest(nameof(CanLoadLibraryFromTempDirAndCallFunction)).ShouldBe(0);
+        }
+
+        [Fact]
+        public void CanCreateManagerWithoutLogging()
+        {
+            var manager = new LibraryManager();
         }
 
         private int RunTest(string name)
