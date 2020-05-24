@@ -68,13 +68,20 @@ accessor.Binary("Foo.Bar.lib.dll")
 `LibraryManager` extracts your dependencies to current process' current directory. **This is the only reliable way to use `[DllImport]` on all
 three platforms.**
 
-If your current directory isn't writable, you are generally out of luck. You can still use explicit library loading on Windows and Linux, but on
-MacOs you are screwed. This problem can be mitigated by manually resolving function pointers, but this approach is not yet implemented in this library.
+If your current directory isn't writable, you are generally out of luck. You can use an overload of `LibraryManager`'s constructor which accepts
+a custom target directory, but then you need to do one of the following:
+
+1. Ensure that target directory that you specify is discoverable by system library loader. The safest bet is to ensure it's on your `PATH`
+**before the whole process starts**.
+2. Enable explicit library loading with `LibraryManager.LoadLibraryExplicit` (read the next section for details). 
+**This will not work on MacOs.** If your target path is not discoverable by system library loader, `dlopen` will succeed on MacOs, but your
+P/Invoke calls will fail. This problem can be mitigated by manually resolving function pointers, but this approach is not yet implemented 
+in this library.
 
 ## Explicit library loading
 
 **Warning! Explicit library loading on MacOs IS USELESS, and your P/Invoke call will fail unless library path is discoverable by system library 
-loader (by setting `LD_LIBRARY_PATH` before running your app, for example).**
+loader (by adding target path to `LD_LIBRARY_PATH` or `PATH` before running your app, for example).**
 
 In previous versions of `NativeLibraryManager` the default behavior was to explicitly load every file using `LoadLibraryEx` on Windows
 and `dlopen` on Linux (explit loading wasn't implemented for MacOs). This approach was quite rigid and caused at least two problems:
@@ -82,8 +89,7 @@ and `dlopen` on Linux (explit loading wasn't implemented for MacOs). This approa
 1. There might have been some supporting files which didn't require explicit loading. You couldn't load some files and not load the others.
 2. You should have observed a specific order in which you defined `LibraryFile`s if some of them were dependent on others.
 
-Starting from v. `1.0.21` explicit loading is disabled by default in favor of extracting all dependencies into process' current directory. 
-I recommend this approach as more flexible and error-proof.
+Starting from v. `1.0.21` explicit loading is disabled by default.
 
 Nevertheless, sometimes you might want to load libraries explicitly. To do so, set `LibraryManager.LoadLibraryExplicit` to `True` before
 calling `LibraryManager.LoadNativeLibrary()`.
