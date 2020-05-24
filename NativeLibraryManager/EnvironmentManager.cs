@@ -11,7 +11,9 @@ namespace NativeLibraryManager
     {
         private static readonly Dictionary<Platform, string> _varNames = new Dictionary<Platform, string>
         {
-            {Platform.MacOs, "DYLD_LIBRARY_PATH"}
+            {Platform.MacOs, "DYLD_LIBRARY_PATH"},
+            {Platform.Linux, "LD_LIBRARY_PATH"},
+            {Platform.Windows, "PATH"}
         };
         
         /// <summary>

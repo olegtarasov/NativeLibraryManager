@@ -40,7 +40,7 @@ namespace NativeLibraryManager
 		[Obsolete("This method is no longer used to determine unpack path. It's determined at LibraryManager, once for all files.", true)]
 		public string GetUnpackPath(Assembly targetAssembly)
 		{
-			return targetAssembly.CombineWithCurrentDirectory(FileName);
+			return null;
 		}
 	}
 }

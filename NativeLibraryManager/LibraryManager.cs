@@ -31,16 +31,36 @@ namespace NativeLibraryManager
 		/// <summary>
 		/// Ctor.
 		/// </summary>
-		/// <param name="targetAssembly">Calling assembly.</param>
+		/// <param name="targetAssembly">
+		/// Calling assembly. Native libraries will be extracted to the same directory <see cref="targetAssembly"/>
+		/// resides at, or to current directory if you assembly is weird and doesn't have a location.
+		/// </param>
 		/// <param name="loggerFactory">Logger factory.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
 		public LibraryManager(Assembly targetAssembly, ILoggerFactory loggerFactory, params LibraryItem[] items)
+			: this(targetAssembly.GetCurrentDirectory(), loggerFactory, items)
 		{
-			string targetDirectory = targetAssembly.GetCurrentDirectory();
+		}
+
+		/// <summary>
+		/// Ctor.
+		/// </summary>
+		/// <param name="targetDirectory">Target directory to extract the libraries.</param>
+		/// <param name="loggerFactory">Logger factory.</param>
+		/// <param name="items">Library binaries for different platforms.</param>
+		public LibraryManager(string targetDirectory, ILoggerFactory loggerFactory, params LibraryItem[] items)
+		{
+			TargetDirectory = targetDirectory;
 			var itemLogger = loggerFactory?.CreateLogger<LibraryItem>();
 
-			_items = items.Select(x => new LibraryItemInternal(x, targetDirectory, itemLogger)).ToArray();
+			_items = items.Select(x => new LibraryItemInternal(x, itemLogger)).ToArray();
 		}
+
+		/// <summary>
+		/// Target directory to which native libraries will be extracted. Defaults to directory
+		/// in which targetAssembly, passed to <see cref="LibraryManager"/> constructor, resides.
+		/// </summary>
+		public string TargetDirectory { get; set; }
 
 		/// <summary>
 		/// Extract and load native library based on current platform and process bitness.
@@ -49,7 +69,17 @@ namespace NativeLibraryManager
 		/// <param name="loadLibrary">
 		/// Use LoadLibrary API call on Windows to explicitly load library into the process.
 		/// </param>
-		public void LoadNativeLibrary(bool loadLibrary = true)
+		[Obsolete("This method is obsolete. Direct library loading is deprecated in favor of adding target path to environment library search path.")]
+		public void LoadNativeLibrary(bool loadLibrary)
+		{
+			LoadNativeLibrary();
+        }
+		
+		/// <summary>
+		/// Extract and load native library based on current platform and process bitness.
+		/// Throws an exception if current platform is not supported.
+		/// </summary>
+		public void LoadNativeLibrary()
 		{
 			if (_libLoaded)
 			{
@@ -63,12 +93,14 @@ namespace NativeLibraryManager
 					return;
 				}
 
-                var item = FindItem();
-                item.LoadItem(loadLibrary);
+				var item = FindItem();
+
+				EnvironmentManager.AddDirectoriesToSearchPath(item.Platform, TargetDirectory);
+				item.LoadItem(TargetDirectory);
 
 				_libLoaded = true;
-            }
-        }
+			}
+		}
 
 		/// <summary>
 		/// Finds a library item based on current platform and bitness.

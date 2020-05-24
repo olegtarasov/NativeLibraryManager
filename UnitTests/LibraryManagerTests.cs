@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using MartinCostello.Logging.XUnit;
@@ -16,20 +18,19 @@ namespace UnitTests
         
         public LibraryManagerTests(ITestOutputHelper outputHelper)
         {
-            OutputHelper = outputHelper;
+            LoggerFactory = new LoggerFactory(new[] {new XUnitLoggerProvider(outputHelper, new XUnitLoggerOptions())});
         }
 
-        private ITestOutputHelper OutputHelper { get; }
+        private LoggerFactory LoggerFactory { get; }
 
         
         [Fact]
-        public void CanLoadLibraryAndCallFunction()
+        public void CanLoadLibraryFromAssemblyDirAndCallFunction()
         {
-            var factory = new LoggerFactory(new[] {new XUnitLoggerProvider(OutputHelper, new XUnitLoggerOptions())});
             var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
             var libManager = new LibraryManager(
                 Assembly.GetExecutingAssembly(),
-                factory,
+                LoggerFactory,
                 new LibraryItem(Platform.MacOs, Bitness.x64,
                     new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
                 new LibraryItem(Platform.Windows, Bitness.x64, 
@@ -41,6 +42,36 @@ namespace UnitTests
 
             int result = hello();
             result.ShouldBe(42);
+        }
+        
+        [Fact]
+        public void CanLoadLibraryFromTempDirAndCallFunction()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
+                var libManager = new LibraryManager(
+                    tempDir,
+                    LoggerFactory,
+                    new LibraryItem(Platform.MacOs, Bitness.x64,
+                        new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
+                    new LibraryItem(Platform.Windows, Bitness.x64, 
+                        new LibraryFile("TestLib.dll", accessor.Binary("TestLib.dll"))),
+                    new LibraryItem(Platform.Linux, Bitness.x64,
+                        new LibraryFile("libTestLib.so", accessor.Binary("libTestLib.so"))));
+    
+                libManager.LoadNativeLibrary();
+
+                int result = hello();
+                result.ShouldBe(42);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
         }
     }
 }

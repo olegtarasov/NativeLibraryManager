@@ -8,41 +8,37 @@ namespace NativeLibraryManager
 {
     internal class LibraryItemInternal : LibraryItem
     {
-        private readonly string _targetDirectory;
         private readonly ILogger<LibraryItem> _logger;
 
-        internal LibraryItemInternal(LibraryItem item, string targetDirectory, ILogger<LibraryItem> logger = null) 
+        internal LibraryItemInternal(LibraryItem item, ILogger<LibraryItem> logger = null) 
             : base(item.Platform, item.Bitness, item.Files)
         {
-            _targetDirectory = targetDirectory;
             _logger = logger;
         }
         
-        public override void LoadItem(bool loadLibrary = true)
+        public override void LoadItem(string targetDirectory)
         {
-	        EnvironmentManager.AddDirectoriesToSearchPath(Platform, _targetDirectory);
-
 	        foreach (var file in Files)
 	        {
-		        string path = Path.Combine(_targetDirectory, file.FileName);
+		        string path = Path.Combine(targetDirectory, file.FileName);
 
 		        _logger?.LogInformation($"Unpacking native library {file.FileName} to {path}");
 
 		        UnpackFile(path, file.Resource);
 
-		        if (!loadLibrary)
-		        {
-			        continue;
-		        }
-
-		        if (Platform == Platform.Windows)
-		        {
-			        LoadWindowsLibrary(path);
-		        }
-		        else if (Platform == Platform.Linux)
-		        {
-			        LoadLinuxLibrary(path);
-		        }
+		        // if (!loadLibrary)
+		        // {
+			       //  continue;
+		        // }
+		        //
+		        // if (Platform == Platform.Windows)
+		        // {
+			       //  LoadWindowsLibrary(path);
+		        // }
+		        // else if (Platform == Platform.Linux)
+		        // {
+			       //  LoadLinuxLibrary(path);
+		        // }
 	        }
         }
 
