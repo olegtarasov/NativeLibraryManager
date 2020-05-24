@@ -27,6 +27,10 @@ namespace UnitTests
         [Fact]
         public void CanLoadLibraryFromAssemblyDirAndCallFunction()
         {
+            File.Delete("libTestLib.dylib");
+            File.Delete("libTestLib.so");
+            File.Delete("TestLib.dll");
+            
             var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
             var libManager = new LibraryManager(
                 Assembly.GetExecutingAssembly(),
@@ -47,6 +51,10 @@ namespace UnitTests
         [Fact]
         public void CanLoadLibraryFromTempDirAndCallFunction()
         {
+            File.Delete("libTestLib.dylib");
+            File.Delete("libTestLib.so");
+            File.Delete("TestLib.dll");
+            
             string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
 
