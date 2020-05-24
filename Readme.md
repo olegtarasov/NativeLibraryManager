@@ -85,8 +85,8 @@ You may not want to modify these variables in some circumstances, so you can dis
 
 ## Explicit library loading
 
-**Warning! I strongly suggest that you use library search path modification (on by default) instead of loading libraries explitly.
-Tests show that explicit library loading doesn't work in many cases and is generally useless at least on MacOs.**
+**Warning! I strongly suggest that you use library search path modification (on by default) instead of loading libraries explicitly.
+Tests show that explicit library loading doesn't work in many cases and is generally useless, at least on MacOs.**
 
 In previous versions of `NativeLibraryManager` the default behavior was to explicitly load every file using `LoadLibraryEx` on Windows
 and `dlopen` on Linux (explit loading wasn't implemented for MacOs). This approach was quite rigid and caused at least two problems:
