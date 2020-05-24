@@ -51,7 +51,8 @@ namespace NativeLibraryManager
         /// Unpacks the library and directly loads it if on Windows.
         /// </summary>
         /// <param name="targetDirectory">Target directory to which library is extracted.</param>
-        public virtual void LoadItem(string targetDirectory)
+        /// <param name="loadLibrary">Load library explicitly.</param>
+        public virtual void LoadItem(string targetDirectory, bool loadLibrary)
         {
             throw new InvalidOperationException("This item was never added to the LibraryManager. Create a LibraryManager, add this item and then call LibraryManager.LoadNativeLibrary().");
         }

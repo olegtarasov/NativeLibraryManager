@@ -16,7 +16,7 @@ namespace NativeLibraryManager
             _logger = logger;
         }
         
-        public override void LoadItem(string targetDirectory)
+        public override void LoadItem(string targetDirectory, bool loadLibrary)
         {
 	        foreach (var file in Files)
 	        {
@@ -26,19 +26,19 @@ namespace NativeLibraryManager
 
 		        UnpackFile(path, file.Resource);
 
-		        // if (!loadLibrary)
-		        // {
-			       //  continue;
-		        // }
-		        //
-		        // if (Platform == Platform.Windows)
-		        // {
-			       //  LoadWindowsLibrary(path);
-		        // }
-		        // else if (Platform == Platform.Linux)
-		        // {
-			       //  LoadLinuxLibrary(path);
-		        // }
+		        if (!loadLibrary || !file.CanLoadExplicitly)
+		        {
+			        continue;
+		        }
+		        
+		        if (Platform == Platform.Windows)
+		        {
+			        LoadWindowsLibrary(path);
+		        }
+		        else if (Platform == Platform.Linux || Platform == Platform.MacOs)
+		        {
+			        LoadNixLibrary(path);
+		        }
 	        }
         }
 
@@ -66,19 +66,16 @@ namespace NativeLibraryManager
 			File.WriteAllBytes(path, bytes);
 		}
 
-		internal void LoadLinuxLibrary(string path)
+		internal void LoadNixLibrary(string path)
 		{
-			_logger?.LogInformation($"Linux dlopen of {path}");
+			_logger?.LogInformation($"Calling dlopen for {path}");
 			var result = dlopen(path, RTLD_LAZY | RTLD_GLOBAL);
-			if (result.Equals(null) )
-			{
-				_logger?.LogInformation($"Linux dlopen failed to load {path}");
-			}
+			_logger?.LogInformation(result == IntPtr.Zero ? "FAILED!" : "Success");
 		}
 
 		internal void LoadWindowsLibrary(string path)
 		{
-			_logger?.LogInformation($"Directly loading {path}...");
+			_logger?.LogInformation($"Calling LoadLibraryEx for {path}...");
 			var result = LoadLibraryEx(path, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_SYSTEM32 | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_USER_DIRS);
 			_logger?.LogInformation(result == IntPtr.Zero ? "FAILED!" : "Success");
 		}

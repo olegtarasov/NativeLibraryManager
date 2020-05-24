@@ -63,6 +63,23 @@ namespace NativeLibraryManager
 		public string TargetDirectory { get; set; }
 
 		/// <summary>
+		/// Defines whether <see cref="LibraryManager"/> should add <see cref="TargetDirectory"/>
+		/// to current process' library search path.
+		///
+		/// Default is <code>True</code>.
+		/// </summary>
+		public bool ModifyLibrarySearchPath { get; set; } = true;
+
+		/// <summary>
+		/// Defines whether shared libraries will be loaded explicitly. <code>LoadLibraryEx</code> is
+		/// used on Windows and <code>dlopen</code> is used on Linux and MacOs to load libraries
+		/// explicitly.
+		///
+		/// Default is <code>False</code>, since <see cref="ModifyLibrarySearchPath"/> is preferable.
+		/// </summary>
+		public bool LoadLibraryExplicit { get; set; } = false;
+
+		/// <summary>
 		/// Extract and load native library based on current platform and process bitness.
 		/// Throws an exception if current platform is not supported.
 		/// </summary>
@@ -95,8 +112,12 @@ namespace NativeLibraryManager
 
 				var item = FindItem();
 
-				EnvironmentManager.AddDirectoriesToSearchPath(item.Platform, TargetDirectory);
-				item.LoadItem(TargetDirectory);
+				if (ModifyLibrarySearchPath)
+				{
+					EnvironmentManager.AddDirectoriesToSearchPath(item.Platform, TargetDirectory);
+				}
+				
+				item.LoadItem(TargetDirectory, LoadLibraryExplicit);
 
 				_libLoaded = true;
 			}
