@@ -1,6 +1,6 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/olegtarasov/NativeLibraryManager/Build%20and%20publish%20Nuget?style=flat-square)
-![Nuget](https://img.shields.io/nuget/v/NativeLibraryManager?style=flat-square)
-![Donwloads](https://img.shields.io/nuget/dt/NativeLibraryManager?label=Nuget&style=flat-square)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/olegtarasov/NativeLibraryManager/Build%20and%20publish%20Nuget?style=flat-square)](https://github.com/olegtarasov/NativeLibraryManager/actions)
+[![Nuget](https://img.shields.io/nuget/v/NativeLibraryManager?style=flat-square)](https://www.nuget.org/packages/NativeLibraryManager)
+[![Donwloads](https://img.shields.io/nuget/dt/NativeLibraryManager?label=Nuget&style=flat-square)](https://www.nuget.org/packages/NativeLibraryManager)
 
 # Native dependency manager for .NET Standard libraries
 
