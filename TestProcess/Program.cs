@@ -56,13 +56,17 @@ namespace TestProcess
                 _logger.LogWarning(e, $"Failed to cleanup libraries before running a test: {e.Message}");
             }
         }
-
-        [Verb]
+        (Action<string> LogInformation, Action<string> LogWarning)  LogCreate(Type  type)
+        {
+            var logger = _factory.CreateLogger(type);
+            return (info => logger.LogInformation(info), war => logger.LogWarning(war));
+        }
+       [Verb]
         public int CanLoadLibraryFromCurrentDirAndCallFunction()
         {
             var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
-            var libManager = new LibraryManager(
-                _factory,
+
+            var libManager = new LibraryManager(LogCreate,
                 new LibraryItem(Platform.MacOs, Bitness.x64,
                     new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
                 new LibraryItem(Platform.Windows, Bitness.x64, 
@@ -88,7 +92,7 @@ namespace TestProcess
             var accessor = new ResourceAccessor(Assembly.GetExecutingAssembly());
             var libManager = new LibraryManager(
                 tempDir,
-                _factory,
+                LogCreate,
                 new LibraryItem(Platform.MacOs, Bitness.x64,
                     new LibraryFile("libTestLib.dylib", accessor.Binary("libTestLib.dylib"))),
                 new LibraryItem(Platform.Windows, Bitness.x64,

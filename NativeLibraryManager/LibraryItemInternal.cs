@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 
 namespace NativeLibraryManager
 {
     internal class LibraryItemInternal : LibraryItem
     {
-        private readonly ILogger<LibraryItem> _logger;
+        private readonly (Action<string> LogInformation, Action<string> LogWarning)? _logger;
 
-        internal LibraryItemInternal(LibraryItem item, ILogger<LibraryItem> logger = null) 
+        internal LibraryItemInternal(LibraryItem item,  (Action<string> LogInformation, Action<string> LogWarning)?  logger ) 
             : base(item.Platform, item.Bitness, item.Files)
         {
             _logger = logger;

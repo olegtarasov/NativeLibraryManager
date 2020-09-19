@@ -5,7 +5,6 @@ using System.Net.Cache;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 
 namespace NativeLibraryManager
 {
@@ -15,10 +14,10 @@ namespace NativeLibraryManager
 	public class LibraryManager
 	{
 		private readonly object _resourceLocker = new object();
-		private readonly LibraryItemInternal[] _items;
-		private readonly ILogger<LibraryManager> _logger;
+        private readonly LibraryItemInternal[] _items;
+        private readonly (Action<string> LogInformation, Action<string> LogWarning)? _logger;
 
-		private bool _libLoaded = false;
+        private bool _libLoaded = false;
 
 		/// <summary>
 		/// Creates a new library manager which extracts to environment current directory by default.
@@ -45,7 +44,7 @@ namespace NativeLibraryManager
 		/// </summary>
 		/// <param name="loggerFactory">Logger factory.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(ILoggerFactory loggerFactory, params LibraryItem[] items)
+		public LibraryManager(Func<Type, (Action<string> LogInformation, Action<string> LogWarning)> loggerFactory, params LibraryItem[] items)
 			: this(Environment.CurrentDirectory, false, loggerFactory, items)
 		{
 		}
@@ -58,17 +57,17 @@ namespace NativeLibraryManager
 		/// <param name="targetDirectory">Target directory to extract the libraries.</param>
 		/// <param name="loggerFactory">Logger factory.</param>
 		/// <param name="items">Library binaries for different platforms.</param>
-		public LibraryManager(string targetDirectory, ILoggerFactory loggerFactory, params LibraryItem[] items)
+		public LibraryManager(string targetDirectory, Func<Type, (Action<string> LogInformation, Action<string> LogWarning)> loggerFactory, params LibraryItem[] items)
 			: this(targetDirectory, true, loggerFactory, items)
 		{
 		}
 		
-		private LibraryManager(string targetDirectory, bool customDirectory, ILoggerFactory loggerFactory, params LibraryItem[] items)
+		private LibraryManager(string targetDirectory, bool customDirectory,Func <Type, (Action<string> LogInformation, Action<string> LogWarning)>  loggerFactory, params LibraryItem[] items)
 		{
 			TargetDirectory = targetDirectory;
-			var itemLogger = loggerFactory?.CreateLogger<LibraryItem>();
+			var itemLogger = loggerFactory?.Invoke(typeof(LibraryItem));
 
-			_logger = loggerFactory?.CreateLogger<LibraryManager>();
+			_logger = loggerFactory?.Invoke(typeof(LibraryManager));
 			_items = items.Select(x => new LibraryItemInternal(x, itemLogger)).ToArray();
 
 			if (customDirectory)

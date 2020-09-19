@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 
 namespace NativeLibraryManager
 {
