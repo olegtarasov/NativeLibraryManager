@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net45;net40</TargetFrameworks>
     <Authors>Oleg Tarasov</Authors>
     <Description>A .NET Standard 2.0 library to manage native dependencies stored as binary resources.</Description>
     <PackageProjectUrl>https://github.com/olegtarasov/NativeLibraryManager</PackageProjectUrl>
@@ -11,5 +11,14 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DocumentationFile>bin\Release\NativeLibraryManager.xml</DocumentationFile>
   </PropertyGroup>
+
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net40' or '$(TargetFramework)' == 'net45'">
+		<PackageReference Include="System.ValueTuple">
+			<Version>4.5.0</Version>
+		</PackageReference>
+	</ItemGroup>
+
+ 
 
 </Project>
